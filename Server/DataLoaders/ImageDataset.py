@@ -1,13 +1,15 @@
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
+from preprocessUtil import get_transformations
 
-class CustomDataset(Dataset):
+class ImageDataset(Dataset):
 
-    def __init__(self, dataset, labels):
+    def __init__(self, dataset, labels, transformations):
+        super().__init__()
         self.dataset = dataset
         self.labels = labels
-        self.transform = transforms.Compose([transforms.ToTensor(),transforms.ConvertImageDtype(torch.float32 ) ,  transforms.Normalize((0.1307,), (0.3081,))])
+        self.transform = transforms.Compose(get_transformations(transformations))
         self.target_transform = transforms.Compose([transforms.ToTensor()])
 
     def __len__(self):
@@ -17,4 +19,4 @@ class CustomDataset(Dataset):
         image = self.dataset[index]
         image = self.transform(image)
         label = torch.tensor(self.labels[index]).type(torch.LongTensor)
-        return image, label
+        return image, label, label

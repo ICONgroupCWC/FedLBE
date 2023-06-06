@@ -1,12 +1,12 @@
 import json
 from torch.utils.data import DataLoader
 import asyncio
-from CustomDataset import CustomDataset
 from modelUtil import get_optimizer, get_criterion
+from DataLoaders.loaderUtil import getDataloader
 
 class ClientUpdate(object):
-    def __init__(self, dataset, batchSize, learning_rate, epochs, labels, optimizer_type, criterion):
-        self.train_loader = DataLoader(CustomDataset(dataset, labels), batch_size=batchSize, shuffle=True)
+    def __init__(self, dataset, batchSize, learning_rate, epochs, labels, optimizer_type, criterion, dataops):
+        self.train_loader = DataLoader(getDataloader(dataset, labels, dataops), batch_size=batchSize, shuffle=True)
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.optimizer_type = optimizer_type

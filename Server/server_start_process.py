@@ -17,6 +17,8 @@ from pathlib import Path
 import sys
 
 import pickle
+
+from Server.DataLoaders.loaderUtil import getDataloader
 from Server.utils import create_message, create_message_results
 
 
@@ -27,12 +29,11 @@ class JobServer:
         self.local_weights = []
         self.local_loss = []
 
-    def load_dataset(self):
-        transforms_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-        mnist_data_train = datasets.MNIST('./data/mnist', train=True, download=True, transform=transforms_mnist)
-        mnist_data_test = datasets.MNIST('./data/mnist', train=False, download=True, transform=transforms_mnist)
+    def load_dataset(self, folder):
 
-        return mnist_data_train, mnist_data_test
+        data_test = np.load('data/' + str(folder) + '/X.npy')
+        labels = np.load('data/' + str(folder) + '/y.npy')
+        return data_test, labels
 
     def iid_partition(self, dataset, K):
         num_items_per_client = int(len(dataset) / K)
@@ -45,18 +46,20 @@ class JobServer:
 
         return client_dict
 
-    def testing(self, model, dataset, bs, criterion):
+    def testing(self, model, preprocessing, bs, criterion):
+
+        dataset, labels = self.load_dataset(preprocessing['folder'])
         test_loss = 0
         correct = 0
-        test_loader = DataLoader(dataset, batch_size=bs)
+        test_loader = DataLoader(getDataloader(dataset, labels, preprocessing), batch_size=bs, shuffle=False)
         model.eval()
-        for data, labels in test_loader:
-            # data, labels = data.cuda(), labels.cuda()
+        for data, label, label_2 in test_loader:
+            # data, label = data.cuda(), label.cuda()
             output = model(data)
-            loss = criterion(output, labels)
+            loss = criterion(output, label)
             test_loss += loss.item() * data.size(0)
             _, pred = torch.max(output, 1)
-            correct += pred.eq(labels.data.view_as(pred)).sum().item()
+            correct += pred.eq(label_2.data.view_as(pred)).sum().item()
 
         test_loss /= len(test_loader.dataset)
         test_accuracy = 100. * correct / len(test_loader.dataset)
@@ -64,7 +67,7 @@ class JobServer:
         return test_loss, test_accuracy
 
     async def connector(self, client_uri, data, server_socket):
-        async with websockets.connect(client_uri, ping_interval=None) as websocket:
+        async with websockets.connect(client_uri, ping_interval=None, max_size=3000000) as websocket:
             finished = False
             try:
                 await websocket.send(data)
@@ -122,11 +125,11 @@ class JobServer:
         eta = float(schemeData['lr'])
         B = int(schemeData['minibatch'])
         B_test = int(schemeData['minibatchtest'])
-
+        preprocessing = job_data['preprocessing']
         model_data = job_data['modelData']['model'][0]
-        print(model_data)
-        mnist_data_train, mnist_data_test = self.load_dataset()
-        iid_dict = self.iid_partition(mnist_data_train, K)
+
+        # data_train, data_test = self.load_dataset()
+        # iid_dict = self.iid_partition(data_train, K)
 
         # with open(filename, "rb") as source_file:
         #     code = compile(source_file.read(), filename, "exec")
@@ -134,9 +137,9 @@ class JobServer:
 
         # model = MLP_Net()
         criterion = nn.CrossEntropyLoss()
-        ds = mnist_data_train
-
-        data_dict = iid_dict
+        # ds = data_train
+        #
+        # data_dict = iid_dict
         global_weights = model.state_dict()
         train_loss = []
         test_loss = []
@@ -168,7 +171,8 @@ class JobServer:
                 client_uri = 'ws://' + str(client['client_ip']) + '/process'
                 # websockets.connect(client_uri)
                 print(client_uri)
-                serialized_data = create_message(B, eta, E, data_dict[S_t[st_count]], data['file'], job_data['modelParam'], global_weights)
+                serialized_data = create_message(B, eta, E,  data['file'], job_data['modelParam'],
+                                                 preprocessing, global_weights)
                 tasks.append(self.connector(client_uri, serialized_data, websocket))
                 # loop.create_task(connector(client_uri, serialized_data, websocket))
                 st_count += 0
@@ -188,7 +192,7 @@ class JobServer:
             loss_avg = sum(self.local_loss) / len(self.local_loss)
             train_loss.append(loss_avg)
 
-            g_loss, g_accuracy = self.testing(model, mnist_data_test, B_test, criterion)
+            g_loss, g_accuracy = self.testing(model, preprocessing, B_test, criterion)
             # TODO change to a dict?
             test_loss.append(g_loss)
             test_accuracy.append(g_accuracy)
@@ -199,6 +203,9 @@ class JobServer:
                 tot_time = elapsed_time
 
             round_times.append(tot_time)
+            # if curr_round == T:
+            #     serialized_results = create_message_results(test_accuracy, train_loss, test_loss, curr_round, round_times,global_weights)
+            # else:
             serialized_results = create_message_results(test_accuracy, train_loss, test_loss, curr_round, round_times)
 
             await websocket.send(serialized_results)
