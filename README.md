@@ -1,14 +1,14 @@
-#Federated Learning Backend
+# Federated Learning Backend
 
 This repository contains the backend of the web solution  developed to facilitate federated learning which can be orchestrated using a web front end.Both client and server code can be found here
 
-##Federated Learning
+## Federated Learning
 
 ![architecture diagram](documents/architecture.png)
 
 Code for client and server is provided in their respective folders. 
 
-##Server
+## Server
 ### dependencies
 
 1. [pytorch](https://pytorch.org/) 2.0 or latest
