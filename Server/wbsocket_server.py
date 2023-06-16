@@ -25,6 +25,7 @@ async def listener(websocket, path):
 
         async for message in websocket:
             print('received message')
+            print('message ' + str(message))
             job_data = bson.loads(message)
             print(job_data)
             # job_data = json.loads(ms['jobData'])

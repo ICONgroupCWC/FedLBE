@@ -41,7 +41,6 @@ async def listener(websocket, path):
 
 if __name__ == "__main__":
 
-
     try:
         parser = argparse.ArgumentParser("client")
         parser.add_argument("port", help="Define a valid port for the  client to run on", type=int)

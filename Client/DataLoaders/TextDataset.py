@@ -1,8 +1,5 @@
 import torch
 from torch.utils.data import Dataset
-from torchvision import transforms
-from preprocessUtil import get_transformations
-from .NLPUtils import word_to_indices, letter_to_vec, _one_hot
 import numpy as np
 
 

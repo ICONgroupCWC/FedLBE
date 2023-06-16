@@ -10,10 +10,9 @@ from client_update import ClientUpdate
 
 
 def load_dataset(folder):
-    # transforms_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+
     mnist_data_train = np.load('data/' + str(folder) + '/X.npy')
     mnist_labels = np.load('data/' + str(folder) + '/y.npy')
-    # mnist_data_test = datasets.MNIST('./data/mnist', train=False, download=True, transform=transforms_mnist)
 
     return mnist_data_train, mnist_labels
 
@@ -21,9 +20,11 @@ def load_dataset(folder):
 async def process(job_data, websocket):
     global model
 
+    # Model architecture python file  submitted in the request is written to the local folder
+    # and then loaded as a python class in the following section of the code
+
     job_id = str(uuid.uuid4()).strip('-')
     filename = "./ModelData/" + str(job_id) + '/Model.py'
-    print(filename)
     os.makedirs(os.path.dirname(filename), exist_ok=True)
 
     with open(filename, 'wb') as f:
@@ -37,10 +38,13 @@ async def process(job_data, websocket):
     for name_local in dir(imp_path):
 
         if inspect.isclass(getattr(imp_path, name_local)):
-            print(f'{name_local} is a class')
             modelClass = getattr(imp_path, name_local)
             model = modelClass()
-            print(model)
+
+    # Accessing data from the request
+    # B = Batchsize
+    # eta = Learning rate
+    # E = number of local epochs
 
     B = job_data[0]
     eta = job_data[1]
@@ -54,6 +58,7 @@ async def process(job_data, websocket):
     ds, labels = load_dataset(dataops['folder'])
     client = ClientUpdate(dataset=ds, batchSize=B, learning_rate=eta, epochs=E, labels=labels, optimizer_type=optimizer,
                           criterion=criterion, dataops=dataops)
+
     w, l = await client.train(model, websocket)
 
     results = pickle.dumps([w, l])

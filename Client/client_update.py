@@ -35,7 +35,6 @@ class ClientUpdate(object):
             train_loss = train_loss / len(self.train_loader.dataset)
             e_loss.append(train_loss)
             local_add = websocket.local_address
-            print('local address ' + str(local_add[0]))
             local_add = str(local_add[0]) + ':' + str(local_add[1])
             message = json.dumps({'status': 'training', 'client': str(local_add), 'epoch': str(epoch)})
             await websocket.send(message)
