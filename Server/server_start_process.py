@@ -18,9 +18,9 @@ import sys
 
 import pickle
 
-from Server.DataLoaders.loaderUtil import getDataloader
-from Server.utils import create_message, create_message_results
-from Server.modelUtil import get_criterion
+from DataLoaders.loaderUtil import getDataloader
+from utils import create_message, create_message_results
+from modelUtil import get_criterion
 
 class JobServer:
 

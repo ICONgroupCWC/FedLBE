@@ -3,7 +3,7 @@ import logging
 from concurrent.futures.process import ProcessPoolExecutor
 import bson
 import websockets
-from Server.server_start_process import JobServer
+from server_start_process import JobServer
 import json
 
 task_executor = ProcessPoolExecutor(max_workers=3)
