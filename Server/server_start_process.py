@@ -18,9 +18,10 @@ import sys
 
 import pickle
 
-from DataLoaders.loaderUtil import getDataloader
-from utils import create_message, create_message_results
-from modelUtil import get_criterion
+from Server.DataLoaders.loaderUtil import getDataloader
+from Server.utils import create_message, create_message_results, create_result_dict
+from Server.modelUtil import get_criterion
+import db_service
 
 class JobServer:
 
@@ -87,14 +88,14 @@ class JobServer:
 
         global model
         print('start job called')
-        job_id = str(uuid.uuid4()).strip('-')
+        job_id = uuid.uuid4().hex
         filename = "./ModelData/" + str(job_id) + '/Model.py'
-        print(filename)
+
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
         with open(filename, 'wb') as f:
             f.write(data['file'])
-
+        print('file written')
         path_pyfile = Path(filename)
         sys.path.append(str(path_pyfile.parent))
         mod_path = str(path_pyfile).replace('\\', '.').strip('.py')
@@ -106,7 +107,7 @@ class JobServer:
                 print(f'{name_local} is a class')
                 modelClass = getattr(imp_path, name_local)
                 model = modelClass()
-                print(model)
+
         job_data = data['jobData']
         schemeData = job_data['scheme']
         client_list = job_data['general']['clients']
@@ -118,6 +119,8 @@ class JobServer:
         B = int(schemeData['minibatch'])
         B_test = int(schemeData['minibatchtest'])
         preprocessing = job_data['preprocessing']
+
+        db_service.save_job_data(job_data, job_id)
 
         criterion = get_criterion(job_data['modelParam']['loss'])
 
@@ -157,7 +160,7 @@ class JobServer:
             global_weights = weights_avg
 
             model.load_state_dict(global_weights)
-            torch.save(model.state_dict(), '../model.pt')
+            torch.save(model.state_dict(), "./ModelData/" + str(job_id) + '/model.pt')
             loss_avg = sum(self.local_loss) / len(self.local_loss)
             train_loss.append(loss_avg)
 
@@ -173,6 +176,7 @@ class JobServer:
 
             round_times.append(tot_time)
             serialized_results = create_message_results(test_accuracy, train_loss, test_loss, curr_round, round_times)
-
+            result_dict = create_result_dict(test_accuracy, train_loss, test_loss, curr_round, elapsed_time)
+            db_service.save_results(result_dict, job_id)
             await websocket.send(serialized_results)
             print('calculated results for round ' + str(curr_round))

@@ -6,8 +6,8 @@ import torch
 from torch.utils.data import Dataset
 
 
-def create_message(batch_size, learning_rate, epochs, model,modelParam, transforms,  weights=None):
-    data = [batch_size, learning_rate, epochs,  model, modelParam, transforms]
+def create_message(batch_size, learning_rate, epochs, model, modelParam, transforms, weights=None):
+    data = [batch_size, learning_rate, epochs, model, modelParam, transforms]
     if weights:
         data.append(weights)
 
@@ -25,8 +25,6 @@ def create_message_json(batch_size, learning_rate, epochs, idxs, weights=None):
 
 
 def create_message_results(accuracy, train_loss, test_loss, cur_round, elapsed_time, weights=None):
-
-
     data = {'status': 'results', 'accuracy': str(accuracy), 'train_loss': str(train_loss), 'test_loss': str(test_loss),
             "round": str(cur_round), "round_time": str(elapsed_time)}
     if weights:
@@ -35,3 +33,10 @@ def create_message_results(accuracy, train_loss, test_loss, cur_round, elapsed_t
     serialized_data = json.dumps(data)
 
     return serialized_data
+
+
+def create_result_dict(accuracy, train_loss, test_loss, cur_round, elapsed_time):
+    data = {'accuracy': str(accuracy[-1]), 'train_loss': str(train_loss[-1]), 'test_loss': str(test_loss[-1]),
+            "round": str(cur_round), "round_time": str(elapsed_time)}
+
+    return data

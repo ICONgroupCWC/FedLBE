@@ -28,7 +28,7 @@ Download Server code and run *wbsocket_server.py*.
 2. [websockets](https://websockets.readthedocs.io/en/stable/intro/index.html#installation) (pip install websockets)
 3. [torchvision](https://pypi.org/project/torchvision/)
 
-run *python client_service.py 5000* (any number for port) on the client device
+run *python client_service.py 5000* (or any number for port) on the client device
 
 **The data to train the model should be stored in a subfolder in _./data_ folder.** 
 
