@@ -19,4 +19,4 @@ class ImageDataset(Dataset):
         image = self.dataset[index]
         image = self.transform(image)
         label = torch.tensor(self.labels[index]).type(torch.LongTensor)
-        return image, label, label
+        return image, label

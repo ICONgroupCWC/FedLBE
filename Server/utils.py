@@ -24,9 +24,9 @@ def create_message_json(batch_size, learning_rate, epochs, idxs, weights=None):
     return serialized_data
 
 
-def create_message_results(accuracy, train_loss, test_loss, cur_round, elapsed_time, weights=None):
+def create_message_results(accuracy, train_loss, test_loss, cur_round, elapsed_time, tot_bytes, weights=None):
     data = {'status': 'results', 'accuracy': str(accuracy), 'train_loss': str(train_loss), 'test_loss': str(test_loss),
-            "round": str(cur_round), "round_time": str(elapsed_time)}
+            "round": str(cur_round), "round_time": str(elapsed_time), 'total_bytes': str(tot_bytes)}
     if weights:
         data['model'] = base64.b64encode(pickle.dumps(weights)).decode()
 

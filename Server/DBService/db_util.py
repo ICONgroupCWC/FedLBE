@@ -8,7 +8,7 @@ def create_task_data(data, task_id):
     task_data['task_id'] = task_id
     task_data['user_name'] = 'test'
     task_data['task_name'] = data['general']['task']
-    task_data['overview'] = data['general']['taskOverview']
+    task_data['overview'] = data['general'].get('taskOverview', '')
     task_data['scheme_short'] = data['general']['method']
     task_data['scheme_long'] = schemes[str(data['general']['method'])]
     task_data['host'] = data['general']['host']
@@ -35,7 +35,7 @@ def create_model_data(data, task_id):
     model_data = {}
 
     model_data['task_id'] = task_id
-    model_data['description'] = data['modelData']['modelOverview']
+    model_data['description'] = data['modelData'].get('modelOverview', '')
     model_path = "./ModelData/" + str(task_id)
 
     with open(model_path + '/Model.py', 'rb') as f:
@@ -51,7 +51,7 @@ def create_model_parameters(data, task_id):
     model_param['task_id'] = task_id
     model_param['optimizer'] = data['modelParam']['optimizer']
     model_param['loss'] = data['modelParam']['loss']
-
+    model_param['compression'] = data['modelParam']['compress']
     return model_param
 
 

@@ -51,7 +51,7 @@ def create_model_parameters(data, task_id):
     model_param['task_id'] = task_id
     model_param['optimizer'] = data['modelParam']['optimizer']
     model_param['loss'] = data['modelParam']['loss']
-
+    model_param['compression'] = data['modelParam']['compress']
     return model_param
 
 

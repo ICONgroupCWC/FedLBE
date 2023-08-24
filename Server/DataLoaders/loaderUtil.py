@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 
-from TextDataset import TextDataset
-from ImageDataset import ImageDataset
+from .TextDataset import TextDataset
+from .ImageDataset import ImageDataset
 
 def getDataloader(dataset, labels, dataops):
 

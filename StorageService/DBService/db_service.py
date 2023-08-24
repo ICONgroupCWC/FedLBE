@@ -21,25 +21,28 @@ def get_data(user_name, task_name):
     print('results ' + str(results))
 
     # _, comm_rounds, train_loss, test_loss, round_time, test_accuracy,_ = results
-    results = [(c, d, e,f) for a, b, c, d, e, f, g in results]
+    results = [(c, d, e, f) for a, b, c, d, e, f, g in results]
     print('results after ' + str(results))
     print('task ' + str(task))
-    print('federated ' + str(federated))
-    data['task'] = {'name': task[2], 'date': task[8], 'scheme': task[5], 'clients': len(task[7]),
+    print('clients ' + str(type(task[7])))
+    print('clients ' + str(task[7].strip(',')))
+    print('clients length' + str(len(task[7].split(','))))
+    data['task'] = {'name': task[2], 'date': task[8], 'scheme': task[5], 'clients': len(task[7].split(',')),
                     'client_fraction': federated[4], 'comm_rounds': federated[6]}
     # data['task'] = task
     data['federated'] = {'name': task[2], 'minibatch_size': federated[1], 'local_epoch': federated[2],
                          'learning_rate': federated[3], 'test_batch_size': federated[5],
-                         'optimizer': model_parameters[1], 'loss': model_parameters[2]}
+                         'optimizer': model_parameters[1], 'loss': model_parameters[2], 'compress': model_parameters[3]}
     train_loss = []
     test_loss = []
     test_accuracy = []
     round_time = []
-
+    tot_round_time = 0
     for i in range(len(results)):
         train_loss.append(results[i][0])
         test_loss.append(results[i][1])
-        round_time.append(results[i][2])
+        tot_round_time += results[i][2]
+        round_time.append(tot_round_time)
         test_accuracy.append(results[i][3])
     data['train_loss'] = train_loss
     data['test_loss'] = test_loss
