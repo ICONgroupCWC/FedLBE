@@ -60,11 +60,13 @@ def create_dataset_data(data, task_id):
 
     dataset_param['task_id'] = task_id
     dataset_param['data_type'] = data['preprocessing']['dtype']
-    dataset_param['normalize'] = False if data['preprocessing']['normalize'] is None else data['preprocessing']['normalize']
-    dataset_param['mean'] = 0 if (data['preprocessing']['normalize'] is None or not data['preprocessing']['normalize'] ) else data['preprocessing']['mean']
-    dataset_param['std'] = 0 if (data['preprocessing']['normalize'] is None or not data['preprocessing']['normalize'] ) else data['preprocessing']['std']
+    dataset_param['normalize'] = False if "normalize" not in data['preprocessing'] else data['preprocessing'][
+        'normalize']
+    dataset_param['mean'] = 0 if ("normalize" not in data['preprocessing'] or data['preprocessing']['normalize'] == False) else data['preprocessing']['mean']
+    dataset_param['std'] = 0 if ("normalize" not in data['preprocessing'] or data['preprocessing']['normalize'] == False) else data['preprocessing']['std']
 
     return dataset_param
+
 
 def create_results_data(data, task_id):
     results = {}

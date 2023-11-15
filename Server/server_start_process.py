@@ -1,11 +1,8 @@
 import os
 import uuid
-
 import websockets
 import asyncio
-import time
 import torch
-
 from torch.utils.data import DataLoader
 import copy
 import numpy as np
@@ -14,13 +11,12 @@ import importlib
 import inspect
 from pathlib import Path
 import sys
-from Server.modelUtil import dequantize_tensor, decompress_tensor
+from modelUtil import dequantize_tensor, decompress_tensor
 import pickle
-
-from Server.DataLoaders.loaderUtil import getDataloader
-from Server.utils import create_message, create_message_results, create_result_dict
-from Server.modelUtil import get_criterion
-import db_service
+from DataLoaders.loaderUtil import getDataloader
+from utils import create_message, create_message_results, create_result_dict
+from modelUtil import get_criterion
+from DBService import db_service
 from Scheduler import Scheduler
 import time
 
@@ -54,11 +50,15 @@ class JobServer:
             output = model(data)
             loss = criterion(output, label)
             test_loss += loss.item() * data.size(0)
-            _, pred = torch.max(output, 1)
-            correct += pred.eq(label.data.view_as(pred)).sum().item()
+            if preprocessing['dtype'] != 'One D':
+                _, pred = torch.max(output, 1)
+                correct += pred.eq(label.data.view_as(pred)).sum().item()
 
         test_loss /= len(test_loader.dataset)
-        test_accuracy = 100. * correct / len(test_loader.dataset)
+        if preprocessing['dtype'] != 'One D':
+            test_accuracy = 100. * correct / len(test_loader.dataset)
+        else:
+            test_accuracy = 0
 
         return test_loss, test_accuracy
 
@@ -135,7 +135,8 @@ class JobServer:
         schemeData = job_data['scheme']
         client_list = job_data['general']['clients']
         T = int(schemeData['comRounds'])
-        C = float(schemeData['clientFraction'])
+        C = float(schemeData['clientFraction']) if 'clientFraction' in schemeData else 1
+        schemeData['clientFraction'] = C
         K = int(len(client_list))
         E = int(schemeData['epoch'])
         eta = float(schemeData['lr'])
@@ -144,6 +145,7 @@ class JobServer:
         preprocessing = job_data['preprocessing']
         compress = job_data['modelParam']['compress']
         scheduler_type = schemeData['scheduler']
+
         latency_avg = int(schemeData['latency_avg']) if scheduler_type == 'latency' else 1
         db_service.save_job_data(job_data, job_id)
 
@@ -231,10 +233,10 @@ class JobServer:
 
             round_times.append(tot_time)
             if len(total_bytes) > 0:
-                tot_bytes = total_bytes[-1] + self.bytes[-1]
+                tot_bytes = total_bytes[-1] + self.bytes[-1] / 1e6
             else:
-                tot_bytes = self.bytes[-1]
-            total_bytes.append(tot_bytes)
+                tot_bytes = self.bytes[-1] / 1e6
+            total_bytes.append(round(tot_bytes, 2))
 
             serialized_results = create_message_results(test_accuracy, train_loss, test_loss, curr_round, round_times,
                                                         total_bytes)

@@ -1,5 +1,5 @@
-import db_connector
-import db_util
+from DBService import db_connector
+from DBService import db_util
 
 
 def save_job_data(data, task_id):

@@ -19,7 +19,6 @@ def insert(table, values):
     columns = ", ".join(values.keys())
     placeholders = ", ".join("%s" for _ in values)
     query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-    print(query)
     # Execute the query
     cursor.execute(query, tuple(values.values()))
 
@@ -83,3 +82,5 @@ def get_task_id(user_name, task_name):
     cursor.close()
     conn.close()
     return task_id
+
+

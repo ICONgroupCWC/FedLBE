@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from preprocessUtil import get_transformations
+from .preprocessUtil import get_transformations
 
 class ImageDataset(Dataset):
 
