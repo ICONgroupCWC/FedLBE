@@ -1,0 +1,58 @@
+CREATE TABLE user_account (
+    user_name       varchar  PRIMARY KEY,
+    password        varchar  
+);
+
+CREATE TABLE task (
+    task_id         varchar(32)  PRIMARY KEY,
+    user_name       varchar     NOT NULL REFERENCES user_account (user_name),
+    name            varchar     NOT NULL,
+    overview	    text,
+    scheme_short    varchar(8)  NOT NULL,
+    scheme_long     varchar(32) NOT NULL,
+    host            varchar(24) NOT NULL,
+    clients         varchar     NOT NULL,
+    UNIQUE (user_name, name)
+);
+
+
+CREATE TABLE federated (
+    task_id         varchar(32)  NOT NULL REFERENCES task(task_id),
+    minibatch       int         NOT NULL,
+    local_epoch     int         NOT NULL,
+    learning_rate   double precision	        NOT NULL,
+    client_fraction double precision         NOT NULL,
+    test_bs         int         NOT NULL,
+    comm_rounds     int         NOT NULL
+);
+
+CREATE TABLE model (
+    task_id         varchar(32)  NOT NULL REFERENCES task(task_id),
+    model_arch           bytea       NOT NULL,
+    description     text	
+);
+
+CREATE TABLE model_parameters (
+    task_id         varchar(32)  NOT NULL REFERENCES task(task_id),
+    optimizer       varchar     NOT NULL,
+    loss            varchar     NOT NULL	
+);
+
+CREATE TABLE dataset (
+    task_id         varchar(32)  NOT NULL REFERENCES task(task_id),
+    data_type       varchar     NOT NULL,
+    normalize       boolean,
+    mean            double precision NOT NULL,
+    std             double precision NOT NULL
+);
+
+CREATE TABLE results (
+    task_id         varchar(32)  NOT NULL REFERENCES task(task_id),
+    comm_round      int         NOT NULL,
+    train_loss      double precision NOT NULL,
+    test_loss       double precision NOT NULL,
+    round_time      double precision NOT NULL,
+    test_accuracy   double precision NOT NULL	
+);
+
+
