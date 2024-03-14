@@ -1,0 +1,4 @@
+algo : classification
+no_of_labels : 10
+data_shape: '(28,28,1)'
+no_of_data: 3000

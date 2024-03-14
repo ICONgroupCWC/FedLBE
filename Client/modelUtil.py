@@ -11,7 +11,7 @@ def get_optimizer(op_type, model, lr):
         return torch.optim.SGD(model.parameters(), lr=lr, momentum=0.5)
     elif op_type == 'Adadelta':
         return torch.optim.Adadelta(model.parameters(), lr=lr)
-    elif op_type == 'Adagrad':
+    elif op_type == 'AdaGrad':
         return torch.optim.Adagrad(model.parameters(), lr=lr)
     elif op_type == 'Adam':
         return torch.optim.Adam(model.parameters(), lr=lr)

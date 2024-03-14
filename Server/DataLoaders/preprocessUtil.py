@@ -7,7 +7,7 @@ def get_transformations(trainsforms):
     '''Providing custom transformations'''
     transformations = [transforms.ToTensor(), transforms.ConvertImageDtype(torch.float32)]
 
-    if trainsforms['normalize']:
+    if 'normalize' in trainsforms and trainsforms['normalize']:
         print('normalizing')
         transformations.append(transforms.Normalize((float(trainsforms['mean']),), (float(trainsforms['std']),)))
 

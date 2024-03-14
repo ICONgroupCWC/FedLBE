@@ -1,6 +1,6 @@
 import uuid
 
-schemes = {'FedL': 'Federated Learning', 'DistL': 'Distributed learning'}
+schemes = {'FedL': 'Federated Learning', 'DistL': 'Distributed learning', 'FedLH': 'Federated Learning Heterogeneous'}
 
 
 def create_task_data(data, task_id):

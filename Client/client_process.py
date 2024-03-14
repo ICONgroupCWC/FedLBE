@@ -10,7 +10,7 @@ import torch
 import copy
 from client_update import ClientUpdate
 from modelUtil import quantize_tensor, compress_tensor
-import time
+
 
 def load_dataset(folder):
     mnist_data_train = np.load('data/' + str(folder) + '/X.npy')
@@ -51,8 +51,11 @@ async def process(job_data, websocket):
     # E = number of local epochs
 
     B = job_data[0]
+    print('batch size ' + str(B))
     eta = job_data[1]
+    print('learning rate ' + str(eta))
     E = job_data[2]
+    print('local epochs '+ str(E))
     optimizer = job_data[4]['optimizer']
     criterion = job_data[4]['loss']
     compress = job_data[4]['compress']
@@ -94,5 +97,4 @@ async def process(job_data, websocket):
 
     else:
         results = pickle.dumps([w, l])
-    time.sleep(4)
     await websocket.send(results)

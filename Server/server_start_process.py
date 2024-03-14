@@ -100,7 +100,7 @@ class JobServer:
                             break
 
                         except Exception as e:
-
+                            print('exception ' + str(e))
                             await server_socket.send(message)
 
                 print('closed')
@@ -206,6 +206,7 @@ class JobServer:
 
             else:
                 print('not compressing')
+                #TODO local weights are not reset check it
                 weights_avg = copy.deepcopy(self.local_weights[0])
                 for k in weights_avg.keys():
                     for i in range(1, len(self.local_weights)):
